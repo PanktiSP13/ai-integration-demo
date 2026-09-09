@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "239595626643",
+    "project_id": "ai-integration-demo",
+    "storage_bucket": "ai-integration-demo.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:239595626643:android:12345d7b7386a3e60bad66",
+        "android_client_info": {
+          "package_name": "com.pinu.ai_integration_demo_project"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCCExl-Q5F3d0fs4-TCjg77QHikDzdJG6Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
