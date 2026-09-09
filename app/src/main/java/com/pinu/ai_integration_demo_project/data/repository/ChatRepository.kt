@@ -27,18 +27,18 @@ class ChatRepository {
         return _chats.value.find { it.id == chatId }
     }
 
-    suspend fun createMessage(chatId: String, content: String, senderType: SenderType) {
+    fun createMessage(chatId: String, content: String, senderType: SenderType) {
       val message = Message(chatId = chatId, content = content, senderType = senderType)
         _messages.value += message
+    }
 
-//        val userMessage = Message(chatId = chatId, content = content, senderType = SenderType.USER)
-//        _messages.value += userMessage
-//
-//        // Mock AI response
-//        delay(1000.milliseconds)
-//        val chat = getChatById(chatId)
-//        val aiContent = "Hello! As a ${chat?.role ?: "Assistant"}, I'm here to help. You said: $content"
-//        val aiMessage = Message(chatId = chatId, content = aiContent, senderType = SenderType.AI)
-//        _messages.value += aiMessage
+    fun updateMessage(chatId: String, chunk: String, senderType: SenderType = SenderType.AI) {
+        _messages.value = _messages.value.map {
+            if (it.chatId == chatId && it.senderType == senderType) {
+                it.copy(content = it.content + chunk)
+            } else {
+                it
+            }
+        }
     }
 }

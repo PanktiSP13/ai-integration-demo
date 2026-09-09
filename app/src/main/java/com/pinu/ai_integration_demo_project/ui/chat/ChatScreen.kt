@@ -60,7 +60,8 @@ fun ChatScreen(
                     )
                     IconButton(onClick = {
                         if (textState.isNotBlank()) {
-                            viewModel.askAI(chatId, textState)
+//                            viewModel.askAI(chatId, textState) //v1
+                            viewModel.askAIStream(chatId, textState)//v2
                             textState = ""
                         }
                     }) {

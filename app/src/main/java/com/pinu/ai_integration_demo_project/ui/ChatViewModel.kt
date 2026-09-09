@@ -35,7 +35,7 @@ class ChatViewModel(private val repository: ChatRepository,
     }
 
 
-
+    //v1
     fun askAI(chatId:String ,prompt: String) {
         viewModelScope.launch {
             repository.createMessage(chatId, prompt, SenderType.USER)
@@ -45,6 +45,27 @@ class ChatViewModel(private val repository: ChatRepository,
             repository.createMessage(chatId, response, SenderType.AI)
         }
     }
+
+    //v2
+    fun askAIStream(chatId: String, prompt: String) {
+        viewModelScope.launch {
+            repository.createMessage(chatId, prompt, SenderType.USER)
+            _isTyping.value = true
+
+            var response = ""
+            aiRepository.askAIStream(prompt).collect { chunk ->
+                if (response.isEmpty()) {
+                    response += chunk
+                    _isTyping.value = false
+                    repository.createMessage(chatId, response, SenderType.AI)
+                } else {
+                    repository.updateMessage(chatId, chunk, SenderType.AI)
+                }
+            }
+        }
+    }
+
+
 
     fun getChatById(chatId: String): Chat? {
         return repository.getChatById(chatId)
