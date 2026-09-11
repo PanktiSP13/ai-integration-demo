@@ -59,10 +59,42 @@ class ChatViewModel(private val repository: ChatRepository,
                     _isTyping.value = false
                     repository.createMessage(chatId, response, SenderType.AI)
                 } else {
-                    repository.updateMessage(chatId, chunk, SenderType.AI)
+                    repository.updateMessage(chatId, getMessages(chatId).value.last().messageId, chunk, SenderType.AI)
                 }
             }
         }
+    }
+
+
+    //v3
+    fun askAIStreamWithChatSession(chatId: String, prompt: String) {
+        viewModelScope.launch {
+
+            // create user message
+            repository.createMessage(chatId = chatId, content = prompt, senderType = SenderType.USER)
+
+            // create AI message
+            val aiMessage = repository.createMessage(chatId = chatId, content = "", senderType = SenderType.AI)
+
+            // show typing indicator until we get response from AI
+            _isTyping.value = true
+
+            try {
+
+                aiRepository.askAIStream(chatId = chatId, prompt = prompt).collect { chunk ->
+                    _isTyping.value = false
+                    repository.updateMessage(messageId = aiMessage.messageId, chunk = chunk, chatId = chatId)
+                }
+
+            } catch (e: Exception) {
+
+                _isTyping.value = false
+                repository.updateMessage(messageId = aiMessage.messageId, chunk = "Something went wrong: ${e.message}",
+                    senderType = SenderType.AI, chatId = chatId)
+            }
+        }
+
+
     }
 
 

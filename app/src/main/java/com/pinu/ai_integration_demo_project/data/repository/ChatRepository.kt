@@ -27,14 +27,15 @@ class ChatRepository {
         return _chats.value.find { it.id == chatId }
     }
 
-    fun createMessage(chatId: String, content: String, senderType: SenderType) {
-      val message = Message(chatId = chatId, content = content, senderType = senderType)
+    fun createMessage(chatId: String, content: String, senderType: SenderType) : Message {
+        val message = Message(chatId = chatId, content = content, senderType = senderType)
         _messages.value += message
+        return  message
     }
 
-    fun updateMessage(chatId: String, chunk: String, senderType: SenderType = SenderType.AI) {
+    fun updateMessage(chatId: String,messageId:String, chunk: String, senderType: SenderType = SenderType.AI) {
         _messages.value = _messages.value.map {
-            if (it.chatId == chatId && it.senderType == senderType) {
+            if (it.chatId == chatId && it.senderType == senderType && it.messageId == messageId) {
                 it.copy(content = it.content + chunk)
             } else {
                 it

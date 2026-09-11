@@ -61,7 +61,8 @@ fun ChatScreen(
                     IconButton(onClick = {
                         if (textState.isNotBlank()) {
 //                            viewModel.askAI(chatId, textState) //v1
-                            viewModel.askAIStream(chatId, textState)//v2
+//                            viewModel.askAIStream(chatId, textState)//v2
+                            viewModel.askAIStreamWithChatSession(chatId, textState)//v3
                             textState = ""
                         }
                     }) {

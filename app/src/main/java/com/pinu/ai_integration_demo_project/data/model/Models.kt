@@ -9,7 +9,7 @@ data class Chat(
 )
 
 data class Message(
-    val id: String = UUID.randomUUID().toString(),
+    val messageId: String = UUID.randomUUID().toString(),
     val chatId: String,
     val content: String,
     val senderType: SenderType,
