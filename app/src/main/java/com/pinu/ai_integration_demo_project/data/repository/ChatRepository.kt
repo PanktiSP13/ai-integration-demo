@@ -1,45 +1,83 @@
 package com.pinu.ai_integration_demo_project.data.repository
 
+import com.pinu.ai_integration_demo_project.data.local.dao.ChatDao
+import com.pinu.ai_integration_demo_project.data.local.dao.MessageDao
+import com.pinu.ai_integration_demo_project.data.local.entities.ChatEntity
+import com.pinu.ai_integration_demo_project.data.local.entities.MessageEntity
 import com.pinu.ai_integration_demo_project.data.model.Chat
 import com.pinu.ai_integration_demo_project.data.model.Message
 import com.pinu.ai_integration_demo_project.data.model.SenderType
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 
-class ChatRepository {
-    private val _chats = MutableStateFlow<List<Chat>>(emptyList())
-    val chats: Flow<List<Chat>> = _chats
-
-    private val _messages = MutableStateFlow<List<Message>>(emptyList())
+class ChatRepository(
+    private val chatDao: ChatDao,
+    private val messageDao: MessageDao
+) {
+    val chats: Flow<List<Chat>> = chatDao.getAllChats().map { entities ->
+        entities.map { it.toDomain() }
+    }
 
     fun getMessages(chatId: String): Flow<List<Message>> {
-        return _messages.map { it.filter { msg -> msg.chatId == chatId } }
-    }
-
-    fun createChat(name: String, role: String): Chat {
-        val newChat = Chat(name = name, role = role)
-        _chats.value += newChat
-        return newChat
-    }
-
-    fun getChatById(chatId: String): Chat? {
-        return _chats.value.find { it.id == chatId }
-    }
-
-    fun createMessage(chatId: String, content: String, senderType: SenderType) : Message {
-        val message = Message(chatId = chatId, content = content, senderType = senderType)
-        _messages.value += message
-        return  message
-    }
-
-    fun updateMessage(chatId: String,messageId:String, chunk: String, senderType: SenderType = SenderType.AI) {
-        _messages.value = _messages.value.map {
-            if (it.chatId == chatId && it.senderType == senderType && it.messageId == messageId) {
-                it.copy(content = it.content + chunk)
-            } else {
-                it
-            }
+        return messageDao.getMessagesForChat(chatId).map { entities ->
+            entities.map { it.toDomain() }
         }
     }
+
+    suspend fun getMessagesSync(chatId: String): List<Message> {
+        return messageDao.getMessagesForChatSync(chatId).map { it.toDomain() }
+    }
+
+    suspend fun createChat(name: String, role: String): Chat {
+        val chat = Chat(name = name, role = role)
+        chatDao.insertChat(chat.toEntity())
+        return chat
+    }
+
+    suspend fun getChatById(chatId: String): Chat? {
+        return chatDao.getChatById(chatId)?.toDomain()
+    }
+
+    suspend fun createMessage(chatId: String, content: String, senderType: SenderType): Message {
+        val message = Message(chatId = chatId, content = content, senderType = senderType)
+        messageDao.insertMessage(message.toEntity())
+        return message
+    }
+
+    suspend fun updateMessage(chatId: String, messageId: String, chunk: String, senderType: SenderType = SenderType.AI) {
+        val existingMessages = messageDao.getMessagesForChatSync(chatId)
+        val targetMessage = existingMessages.find { it.messageId == messageId && it.senderType == senderType }
+        targetMessage?.let {
+            val updatedContent = it.content + chunk
+            messageDao.updateMessageContent(messageId, updatedContent)
+        }
+    }
+
+    // New version of updateMessage used in askAIStreamWithChatSession
+    suspend fun updateMessageV2(messageId: String, chunk: String, chatId: String) {
+        val existingMessages = messageDao.getMessagesForChatSync(chatId)
+        val targetMessage = existingMessages.find { it.messageId == messageId }
+        targetMessage?.let {
+            val updatedContent = it.content + chunk
+            messageDao.updateMessageContent(messageId, updatedContent)
+        }
+    }
+
+    // Helper extensions for mapping
+    private fun ChatEntity.toDomain() = Chat(id = id, name = name, role = role)
+    private fun Chat.toEntity() = ChatEntity(id = id, name = name, role = role)
+    private fun MessageEntity.toDomain() = Message(
+        messageId = messageId,
+        chatId = chatId,
+        content = content,
+        senderType = senderType,
+        timestamp = timestamp
+    )
+    private fun Message.toEntity() = MessageEntity(
+        messageId = messageId,
+        chatId = chatId,
+        content = content,
+        senderType = senderType,
+        timestamp = timestamp
+    )
 }

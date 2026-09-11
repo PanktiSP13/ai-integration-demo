@@ -31,7 +31,9 @@ class ChatViewModel(private val repository: ChatRepository,
     }
 
     fun createChat(name: String, role: String) {
-        repository.createChat(name, role)
+        viewModelScope.launch {
+            repository.createChat(name, role)
+        }
     }
 
 
@@ -83,14 +85,13 @@ class ChatViewModel(private val repository: ChatRepository,
 
                 aiRepository.askAIStream(chatId = chatId, prompt = prompt).collect { chunk ->
                     _isTyping.value = false
-                    repository.updateMessage(messageId = aiMessage.messageId, chunk = chunk, chatId = chatId)
+                    repository.updateMessageV2(messageId = aiMessage.messageId, chunk = chunk, chatId = chatId)
                 }
 
             } catch (e: Exception) {
 
                 _isTyping.value = false
-                repository.updateMessage(messageId = aiMessage.messageId, chunk = "Something went wrong: ${e.message}",
-                    senderType = SenderType.AI, chatId = chatId)
+                repository.updateMessageV2(messageId = aiMessage.messageId, chunk = "Something went wrong: ${e.message}", chatId = chatId)
             }
         }
 
@@ -98,8 +99,7 @@ class ChatViewModel(private val repository: ChatRepository,
     }
 
 
-
-    fun getChatById(chatId: String): Chat? {
+    suspend fun getChatById(chatId: String): Chat? {
         return repository.getChatById(chatId)
     }
 }

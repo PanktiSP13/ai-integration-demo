@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.boswelja.markdown.material3.MarkdownDocument
+import com.pinu.ai_integration_demo_project.data.model.Chat
 import com.pinu.ai_integration_demo_project.data.model.Message
 import com.pinu.ai_integration_demo_project.data.model.SenderType
 import com.pinu.ai_integration_demo_project.ui.ChatViewModel
@@ -28,7 +29,10 @@ fun ChatScreen(
     viewModel: ChatViewModel,
     onBack: () -> Unit
 ) {
-    val chat = viewModel.getChatById(chatId)
+    var chat by remember { mutableStateOf<Chat?>(null) }
+    LaunchedEffect(chatId) {
+        chat = viewModel.getChatById(chatId)
+    }
     val messages by viewModel.getMessages(chatId).collectAsStateWithLifecycle()
     val isTyping by viewModel.isTyping.collectAsStateWithLifecycle()
     var textState by remember { mutableStateOf("") }

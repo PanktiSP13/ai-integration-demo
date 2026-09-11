@@ -5,12 +5,14 @@ import com.google.firebase.Firebase
 import com.google.firebase.ai.Chat
 import com.google.firebase.ai.ai
 import com.google.firebase.ai.type.GenerativeBackend
+import com.google.firebase.ai.type.content
+import com.pinu.ai_integration_demo_project.data.model.SenderType
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlin.time.Duration.Companion.milliseconds
 
-class AIRepository {
+class AIRepository(private val chatRepository: ChatRepository) {
 
     private val model = Firebase.ai(
         backend = GenerativeBackend.googleAI()
@@ -43,10 +45,20 @@ class AIRepository {
     }
 
     //v3 -> maintaining chat session to provide chat context to AI model for better response
-    private fun getOrCreateChatSession(chatId: String): Chat {
-        return chatSessions.getOrPut(chatId) {
-            model.startChat()
+    private suspend fun getOrCreateChatSession(chatId: String): Chat {
+        val session = chatSessions[chatId]
+        if (session != null) return session
+
+        // Restore history from DB
+        val history = chatRepository.getMessagesSync(chatId).map { message ->
+            content(role = if (message.senderType == SenderType.USER) "user" else "model") {
+                text(message.content)
+            }
         }
+
+        val newSession = model.startChat(history = history)
+        chatSessions[chatId] = newSession
+        return newSession
     }
 
     fun askAIStream(chatId: String, prompt: String): Flow<String> = flow {

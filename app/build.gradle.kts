@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.service)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -67,4 +68,9 @@ dependencies {
     //compose markdown
     implementation(libs.compose.markdown.core)
     implementation(libs.compose.markdown.material3)
+
+    //room
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
 }
