@@ -69,7 +69,7 @@ class ChatViewModel(private val repository: ChatRepository,
 
 
     //v3
-    fun askAIStreamWithChatSession(chatId: String, prompt: String) {
+    fun askAIStreamWithChatSession(chatId: String, role: String, prompt: String) {
         viewModelScope.launch {
 
             // create user message
@@ -83,7 +83,7 @@ class ChatViewModel(private val repository: ChatRepository,
 
             try {
 
-                aiRepository.askAIStream(chatId = chatId, prompt = prompt).collect { chunk ->
+                aiRepository.askAIStream(chatId = chatId, role = role, prompt = prompt).collect { chunk ->
                     _isTyping.value = false
                     repository.updateMessageV2(messageId = aiMessage.messageId, chunk = chunk, chatId = chatId)
                 }

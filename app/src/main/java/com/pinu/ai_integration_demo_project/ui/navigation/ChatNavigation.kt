@@ -15,8 +15,8 @@ import com.pinu.ai_integration_demo_project.ui.dashboard.DashboardScreen
 sealed class Screen(val route: String) {
     object Dashboard : Screen("dashboard")
     object ChatList : Screen("chat_list")
-    object Chat : Screen("chat/{chatId}") {
-        fun createRoute(chatId: String) = "chat/$chatId"
+    object Chat : Screen("chat/{chatId}/{role}") {
+        fun createRoute(chatId: String, role: String) = "chat/$chatId/$role"
     }
 }
 
@@ -37,18 +37,23 @@ fun ChatNavigation(viewModel: ChatViewModel) {
         composable(Screen.ChatList.route) {
             ChatListScreen(
                 viewModel = viewModel,
-                onChatSelected = { chatId ->
-                    navController.navigate(Screen.Chat.createRoute(chatId))
+                onChatSelected = { chatId, role ->
+                    navController.navigate(Screen.Chat.createRoute(chatId, role = role))
                 }
             )
         }
         composable(
             route = Screen.Chat.route,
-            arguments = listOf(navArgument("chatId") { type = NavType.StringType })
+            arguments = listOf(
+                navArgument("chatId") { type = NavType.StringType },
+                navArgument("role") { type = NavType.StringType },
+            )
         ) { backStackEntry ->
             val chatId = backStackEntry.arguments?.getString("chatId") ?: return@composable
+            val role = backStackEntry.arguments?.getString("role") ?: return@composable
             ChatScreen(
                 chatId = chatId,
+                role = role,
                 viewModel = viewModel,
                 onBack = { navController.popBackStack() }
             )

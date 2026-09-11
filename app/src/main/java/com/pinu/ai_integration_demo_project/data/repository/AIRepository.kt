@@ -3,7 +3,9 @@ package com.pinu.ai_integration_demo_project.data.repository
 import android.util.Log
 import com.google.firebase.Firebase
 import com.google.firebase.ai.Chat
+import com.google.firebase.ai.GenerativeModel
 import com.google.firebase.ai.ai
+import com.google.firebase.ai.type.Content
 import com.google.firebase.ai.type.GenerativeBackend
 import com.google.firebase.ai.type.content
 import com.pinu.ai_integration_demo_project.data.model.SenderType
@@ -14,16 +16,29 @@ import kotlin.time.Duration.Companion.milliseconds
 
 class AIRepository(private val chatRepository: ChatRepository) {
 
-    private val model = Firebase.ai(
-        backend = GenerativeBackend.googleAI()
-    ).generativeModel("gemini-3.5-flash-lite")
+    private val globalModel = Firebase.ai(backend = GenerativeBackend.googleAI()).generativeModel(modelName = "gemini-3.5-flash-lite")
 
     private val chatSessions = mutableMapOf<String, Chat>() // Chat from firebase
 
 
+    private fun createModel(role: String): GenerativeModel {
+        return Firebase.ai(backend = GenerativeBackend.googleAI()).generativeModel(
+            modelName = "gemini-3.5-flash-lite",
+            systemInstruction = createSystemInstruction(role)
+        )
+    }
+
+    private fun createSystemInstruction(role: String): Content {
+        return content {
+            text(
+                """You are an AI assistant with the role: $role role.Stay within this role and answer relevant questions.For unrelated questions, reply only: "I can only help with topics related to my role."Keep responses concise unless more detail is requested..""".trimIndent()
+            )
+        }
+    }
+
     // v1 -> non-streaming response from AI model
     suspend fun askAI(prompt: String): String {
-        val response =  model.generateContent(prompt).text.orEmpty()
+        val response = globalModel.generateContent(prompt).text.orEmpty()
         Log.e("Pankti", "askAI: $response")
         return response
     }
@@ -31,7 +46,7 @@ class AIRepository(private val chatRepository: ChatRepository) {
     // v2 -> streaming response from AI model
     suspend fun askAIStream(prompt: String): Flow<String> = flow {
         try {
-            model.generateContentStream(prompt).collect { chunk ->
+            globalModel.generateContentStream(prompt).collect { chunk ->
                 emit(chunk.text.orEmpty())
                 Log.e("Pankti", "askAIStream: ${chunk.text.orEmpty()}")
                 delay(100.milliseconds)
@@ -45,11 +60,17 @@ class AIRepository(private val chatRepository: ChatRepository) {
     }
 
     //v3 -> maintaining chat session to provide chat context to AI model for better response
-    private suspend fun getOrCreateChatSession(chatId: String): Chat {
+    private suspend fun getOrCreateChatSession(chatId: String, role: String): Chat {
+
+        // 1. Return existing session
         val session = chatSessions[chatId]
         if (session != null) return session
 
-        // Restore history from DB
+
+        // 2. Create Gemini model with this chat's role
+        val model = createModel(role)
+
+        // 3. Restore history from DB
         val history = chatRepository.getMessagesSync(chatId).map { message ->
             content(role = if (message.senderType == SenderType.USER) "user" else "model") {
                 text(message.content)
@@ -61,13 +82,12 @@ class AIRepository(private val chatRepository: ChatRepository) {
         return newSession
     }
 
-    fun askAIStream(chatId: String, prompt: String): Flow<String> = flow {
+    fun askAIStream(chatId: String, role: String, prompt: String): Flow<String> = flow {
         try {
-            val chat = getOrCreateChatSession(chatId)
+            val chat = getOrCreateChatSession(chatId, role)
 
             chat.sendMessageStream(prompt)
                 .collect { chunk ->
-
                     val text = chunk.text.orEmpty()
 
                     if (text.isNotEmpty()) {

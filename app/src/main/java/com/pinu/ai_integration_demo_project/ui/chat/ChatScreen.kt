@@ -26,6 +26,7 @@ import com.pinu.ai_integration_demo_project.ui.ChatViewModel
 @Composable
 fun ChatScreen(
     chatId: String,
+    role : String,
     viewModel: ChatViewModel,
     onBack: () -> Unit
 ) {
@@ -66,7 +67,7 @@ fun ChatScreen(
                         if (textState.isNotBlank()) {
 //                            viewModel.askAI(chatId, textState) //v1
 //                            viewModel.askAIStream(chatId, textState)//v2
-                            viewModel.askAIStreamWithChatSession(chatId, textState)//v3
+                            viewModel.askAIStreamWithChatSession(chatId, role,textState)//v3
                             textState = ""
                         }
                     }) {

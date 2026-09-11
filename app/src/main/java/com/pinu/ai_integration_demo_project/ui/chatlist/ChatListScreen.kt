@@ -18,7 +18,7 @@ import com.pinu.ai_integration_demo_project.ui.create.CreateAssistantDialog
 @Composable
 fun ChatListScreen(
     viewModel: ChatViewModel,
-    onChatSelected: (String) -> Unit
+    onChatSelected: (String,String) -> Unit
 ) {
     val chats by viewModel.chats.collectAsStateWithLifecycle()
     var showDialog by remember { mutableStateOf(false) }
@@ -39,7 +39,7 @@ fun ChatListScreen(
                 ListItem(
                     headlineContent = { Text(chat.name) },
                     supportingContent = { Text(chat.role) },
-                    modifier = Modifier.clickable { onChatSelected(chat.id) }
+                    modifier = Modifier.clickable { onChatSelected(chat.id,chat.role) }
                 )
                 HorizontalDivider()
             }
