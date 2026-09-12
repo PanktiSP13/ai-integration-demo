@@ -73,4 +73,11 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
+
+    //gson - for parsing JSON
+    implementation(libs.gson)
+
+    //serialization - for parsing JSON
+    implementation(libs.kotlinx.serialization.json)
+
 }

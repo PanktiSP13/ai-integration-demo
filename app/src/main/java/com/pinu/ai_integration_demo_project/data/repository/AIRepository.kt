@@ -6,9 +6,15 @@ import com.google.firebase.ai.Chat
 import com.google.firebase.ai.GenerativeModel
 import com.google.firebase.ai.ai
 import com.google.firebase.ai.type.Content
+import com.google.firebase.ai.type.GenerationConfig
 import com.google.firebase.ai.type.GenerativeBackend
+import com.google.firebase.ai.type.Tool
 import com.google.firebase.ai.type.content
+import com.google.firebase.ai.type.generationConfig
+import com.pinu.ai_integration_demo_project.data.ToolCalls
 import com.pinu.ai_integration_demo_project.data.model.SenderType
+import com.pinu.ai_integration_demo_project.data.repository.chat_support.ChatRepository
+import com.pinu.ai_integration_demo_project.data.schemas.transactionSchema
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -21,10 +27,12 @@ class AIRepository(private val chatRepository: ChatRepository) {
     private val chatSessions = mutableMapOf<String, Chat>() // Chat from firebase
 
 
-    private fun createModel(role: String): GenerativeModel {
+    private fun createModel(role: String, generationConfig: GenerationConfig? = null,tools : List<Tool>?= null): GenerativeModel {
         return Firebase.ai(backend = GenerativeBackend.googleAI()).generativeModel(
             modelName = "gemini-3.5-flash-lite",
-            systemInstruction = createSystemInstruction(role)
+            systemInstruction = createSystemInstruction(role),
+            generationConfig = generationConfig,
+            tools = tools
         )
     }
 
@@ -60,7 +68,7 @@ class AIRepository(private val chatRepository: ChatRepository) {
     }
 
     //v3 -> maintaining chat session to provide chat context to AI model for better response
-    private suspend fun getOrCreateChatSession(chatId: String, role: String): Chat {
+    private suspend fun getOrCreateChatSession(chatId: String, role: String,generationConfig: GenerationConfig? = null,tools : List<Tool>?= null): Chat {
 
         // 1. Return existing session
         val session = chatSessions[chatId]
@@ -68,7 +76,8 @@ class AIRepository(private val chatRepository: ChatRepository) {
 
 
         // 2. Create Gemini model with this chat's role
-        val model = createModel(role)
+        val model = createModel(role, generationConfig, tools)
+
 
         // 3. Restore history from DB
         val history = chatRepository.getMessagesSync(chatId).map { message ->
@@ -105,6 +114,48 @@ class AIRepository(private val chatRepository: ChatRepository) {
 
             if (e.message?.contains("You exceeded your current quota") == true) {
                 emit("Limit exceeded for today. Please try again tomorrow.")
+            } else {
+                throw e
+            }
+        }
+    }
+
+    //v4 -> structured output from AI model
+    suspend fun askBankSupportAI(chatId:String,role: String,prompt: String): String {
+        var generationConfig: GenerationConfig? = null
+        if (chatId == "banking_support") {
+            generationConfig = generationConfig {
+                responseMimeType = "application/json" // Return only JSON. Don't explain anything. Use these exact fields. Don't add Markdown. Don't add extra text.
+                responseSchema = transactionSchema
+            }
+        }
+        val model = createModel(role, generationConfig)
+
+        val response = model.generateContent(prompt).text.orEmpty()
+        Log.e("Pankti", "askAI: $response")
+        return response
+    }
+
+
+    //v5 -> function calling from AI model (Tool calls)
+    suspend fun askBankAppSupportAI(chatId:String,role: String,prompt: String): String{
+        try {
+            val chat = getOrCreateChatSession(chatId, role,tools = listOf(ToolCalls.bankingTool))
+            val response = chat.sendMessage(prompt)
+            Log.e("AI_STREAM", "askBankAppSupportAI: $response")
+
+            response.functionCalls.forEach { functionCall ->
+                println("Function name: ${functionCall.name}")
+                println("Arguments: ${functionCall.args.toList().joinToString(", ")}")
+            }
+            return response.text.orEmpty()
+
+        } catch (e: Exception) {
+
+            Log.e("AI_STREAM", "chatId=$chatId error=${e.message}", e)
+
+            if (e.message?.contains("You exceeded your current quota") == true) {
+             return "Limit exceeded for today. Please try again tomorrow."
             } else {
                 throw e
             }

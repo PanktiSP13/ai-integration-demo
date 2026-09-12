@@ -1,14 +1,15 @@
-package com.pinu.ai_integration_demo_project.data.repository
+package com.pinu.ai_integration_demo_project.data.repository.chat_support
 
-import com.pinu.ai_integration_demo_project.data.local.dao.ChatDao
-import com.pinu.ai_integration_demo_project.data.local.dao.MessageDao
-import com.pinu.ai_integration_demo_project.data.local.entities.ChatEntity
-import com.pinu.ai_integration_demo_project.data.local.entities.MessageEntity
+import com.pinu.ai_integration_demo_project.data.local.chat_support.dao.ChatDao
+import com.pinu.ai_integration_demo_project.data.local.chat_support.dao.MessageDao
+import com.pinu.ai_integration_demo_project.data.local.chat_support.entities.ChatEntity
+import com.pinu.ai_integration_demo_project.data.local.chat_support.entities.MessageEntity
 import com.pinu.ai_integration_demo_project.data.model.Chat
 import com.pinu.ai_integration_demo_project.data.model.Message
 import com.pinu.ai_integration_demo_project.data.model.SenderType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import java.util.UUID
 
 class ChatRepository(
     private val chatDao: ChatDao,
@@ -28,8 +29,8 @@ class ChatRepository(
         return messageDao.getMessagesForChatSync(chatId).map { it.toDomain() }
     }
 
-    suspend fun createChat(name: String, role: String): Chat {
-        val chat = Chat(name = name, role = role)
+    suspend fun createChat(name: String, role: String, id: String = UUID.randomUUID().toString()): Chat {
+        val chat = Chat(id = id, name = name, role = role)
         chatDao.insertChat(chat.toEntity())
         return chat
     }

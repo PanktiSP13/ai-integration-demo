@@ -1,19 +1,37 @@
 package com.pinu.ai_integration_demo_project.ui.chat
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.boswelja.markdown.material3.MarkdownDocument
@@ -27,13 +45,17 @@ import com.pinu.ai_integration_demo_project.ui.ChatViewModel
 fun ChatScreen(
     chatId: String,
     role : String,
+    name:String?,
     viewModel: ChatViewModel,
     onBack: () -> Unit
 ) {
     var chat by remember { mutableStateOf<Chat?>(null) }
+
     LaunchedEffect(chatId) {
+        viewModel.ensureChatExists(chatId, name?:role, role)
         chat = viewModel.getChatById(chatId)
     }
+
     val messages by viewModel.getMessages(chatId).collectAsStateWithLifecycle()
     val isTyping by viewModel.isTyping.collectAsStateWithLifecycle()
     var textState by remember { mutableStateOf("") }
@@ -65,9 +87,17 @@ fun ChatScreen(
                     )
                     IconButton(onClick = {
                         if (textState.isNotBlank()) {
-//                            viewModel.askAI(chatId, textState) //v1
-//                            viewModel.askAIStream(chatId, textState)//v2
-                            viewModel.askAIStreamWithChatSession(chatId, role,textState)//v3
+//                            viewModel.askAI(chatId, role, textState) //v1
+//                            viewModel.askAIStream(chatId, role, textState)//v2
+
+                            if (chatId == "banking_support") {
+                                viewModel.askBankSupportAI(chatId, role, textState) //v4
+                            } else if (chatId == "banking_app_support") {
+                                viewModel.askBankAppSupportAI(chatId, role, textState) //v5
+                            }
+                            else {
+                                viewModel.askAIStreamWithChatSession(chatId, role, textState)//v3
+                            }
                             textState = ""
                         }
                     }) {
@@ -98,8 +128,8 @@ fun ChatScreen(
                         )
                     }
                 }
-                items(messages.reversed()) { message ->
-                    MessageBubble(message)
+                items(messages.size) { index ->
+                    MessageBubble(messages[messages.lastIndex - index])
                 }
             }
         }
@@ -113,9 +143,7 @@ fun MessageBubble(message: Message) {
     val color = if (isUser) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.secondaryContainer
 
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
+        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
         horizontalAlignment = alignment
     ) {
         Box(

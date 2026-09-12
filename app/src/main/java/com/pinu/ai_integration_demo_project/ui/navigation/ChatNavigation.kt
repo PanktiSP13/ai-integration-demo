@@ -15,8 +15,9 @@ import com.pinu.ai_integration_demo_project.ui.dashboard.DashboardScreen
 sealed class Screen(val route: String) {
     object Dashboard : Screen("dashboard")
     object ChatList : Screen("chat_list")
-    object Chat : Screen("chat/{chatId}/{role}") {
-        fun createRoute(chatId: String, role: String) = "chat/$chatId/$role"
+    object Chat : Screen("chat/{chatId}/{role}/{name}") {
+        fun createRoute(chatId: String, role: String, name: String?="") = "chat/$chatId/$role/$name"
+
     }
 }
 
@@ -28,11 +29,14 @@ fun ChatNavigation(viewModel: ChatViewModel) {
         composable(Screen.Dashboard.route) {
             DashboardScreen(
                 viewModel = viewModel,
-                onNavigateToChats = { navController.navigate(Screen.ChatList.route) }
-            ) { modifier ->
-                // Dashboard content could be a summary or welcome screen
-                Text("Welcome to Personal Assistants!", modifier = modifier)
-            }
+                onNavigateToChats = { navController.navigate(Screen.ChatList.route) },
+                onNavigateToBankingSupportChat = {
+                    navController.navigate(Screen.Chat.createRoute("banking_support", "Banking Application Support","Bank Support"))
+                },
+                onNavigateToBankingAppSupportChat = {
+                    navController.navigate(Screen.Chat.createRoute("banking_app_support", "Banking Application Support","Bank App Support"))
+                }
+            )
         }
         composable(Screen.ChatList.route) {
             ChatListScreen(
@@ -47,13 +51,17 @@ fun ChatNavigation(viewModel: ChatViewModel) {
             arguments = listOf(
                 navArgument("chatId") { type = NavType.StringType },
                 navArgument("role") { type = NavType.StringType },
+                navArgument("name") { type = NavType.StringType  ; nullable = true },
             )
         ) { backStackEntry ->
             val chatId = backStackEntry.arguments?.getString("chatId") ?: return@composable
             val role = backStackEntry.arguments?.getString("role") ?: return@composable
+            val name = backStackEntry.arguments?.getString("name") ?: return@composable
+
             ChatScreen(
                 chatId = chatId,
                 role = role,
+                name = name,
                 viewModel = viewModel,
                 onBack = { navController.popBackStack() }
             )

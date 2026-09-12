@@ -6,7 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.pinu.ai_integration_demo_project.data.local.AppDatabase
 import com.pinu.ai_integration_demo_project.data.repository.AIRepository
-import com.pinu.ai_integration_demo_project.data.repository.ChatRepository
+import com.pinu.ai_integration_demo_project.data.repository.chat_support.ChatRepository
 import com.pinu.ai_integration_demo_project.ui.ChatViewModel
 import com.pinu.ai_integration_demo_project.ui.navigation.ChatNavigation
 import com.pinu.ai_integration_demo_project.ui.theme.AI_Integration_Demo_ProjectTheme

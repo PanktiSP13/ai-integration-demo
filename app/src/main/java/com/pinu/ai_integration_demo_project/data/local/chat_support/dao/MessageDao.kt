@@ -1,10 +1,10 @@
-package com.pinu.ai_integration_demo_project.data.local.dao
+package com.pinu.ai_integration_demo_project.data.local.chat_support.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.pinu.ai_integration_demo_project.data.local.entities.MessageEntity
+import com.pinu.ai_integration_demo_project.data.local.chat_support.entities.MessageEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
