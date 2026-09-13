@@ -1,11 +1,10 @@
-package com.pinu.ai_integration_demo_project.data
+package com.pinu.ai_integration_demo_project.data.tool_executors
 
 import com.google.firebase.ai.type.FunctionDeclaration
 import com.google.firebase.ai.type.Schema
 import com.google.firebase.ai.type.Tool
-import com.pinu.ai_integration_demo_project.data.ToolExecutor.getTransactionStatusFunction
 
-object ToolExecutor {
+object BankingToolDefinitions {
 
     val getTransactionStatusFunction = FunctionDeclaration(
         name = "getTransactionStatus",
@@ -16,10 +15,13 @@ object ToolExecutor {
     )
 }
 
-
 object ToolCalls {
     val bankingTool = Tool.functionDeclarations(
-        listOf(getTransactionStatusFunction)
+        listOf(BankingToolDefinitions.getTransactionStatusFunction)
     )
 
+}
+
+enum class ToolName(val value: String){
+    transactionStatus("getTransactionStatus")
 }

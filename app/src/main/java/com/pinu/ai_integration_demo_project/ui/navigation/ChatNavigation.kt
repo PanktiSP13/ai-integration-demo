@@ -1,6 +1,5 @@
 package com.pinu.ai_integration_demo_project.ui.navigation
 
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -11,6 +10,7 @@ import com.pinu.ai_integration_demo_project.ui.ChatViewModel
 import com.pinu.ai_integration_demo_project.ui.chat.ChatScreen
 import com.pinu.ai_integration_demo_project.ui.chatlist.ChatListScreen
 import com.pinu.ai_integration_demo_project.ui.dashboard.DashboardScreen
+import com.pinu.ai_integration_demo_project.ui.utils.BankingMockDataLoader
 
 sealed class Screen(val route: String) {
     object Dashboard : Screen("dashboard")

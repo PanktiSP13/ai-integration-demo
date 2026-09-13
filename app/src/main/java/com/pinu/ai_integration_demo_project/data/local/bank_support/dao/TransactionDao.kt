@@ -1,6 +1,8 @@
 package com.pinu.ai_integration_demo_project.data.local.bank_support.dao
 
 import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.pinu.ai_integration_demo_project.data.local.bank_support.entities.TransactionEntity
 
@@ -9,4 +11,10 @@ interface TransactionDao {
 
     @Query("SELECT * FROM `transaction` WHERE transactionId = :transactionId")
     suspend fun getTransaction(transactionId: String): TransactionEntity?
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertTransactions(transactions: List<TransactionEntity>)
+
+    @Query("SELECT COUNT(*) FROM `transaction`")
+    suspend fun getTransactionCount(): Int
 }

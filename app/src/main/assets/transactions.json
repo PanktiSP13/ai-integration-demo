@@ -1,0 +1,137 @@
+[
+  {
+    "transactionId": "TXN001",
+    "accountId": "ACC001",
+    "type": "UPI",
+    "amount": 1500.00,
+    "status": "SUCCESS",
+    "date": "2026-09-01",
+    "description": "Amazon"
+  },
+  {
+    "transactionId": "TXN002",
+    "accountId": "ACC001",
+    "type": "UPI",
+    "amount": 2500.00,
+    "status": "FAILED",
+    "date": "2026-09-02",
+    "description": "Merchant XYZ"
+  },
+  {
+    "transactionId": "TXN003",
+    "accountId": "ACC001",
+    "type": "CARD",
+    "amount": 499.00,
+    "status": "SUCCESS",
+    "date": "2026-09-03",
+    "description": "Netflix"
+  },
+  {
+    "transactionId": "TXN004",
+    "accountId": "ACC001",
+    "type": "UPI",
+    "amount": 800.00,
+    "status": "DUPLICATE",
+    "date": "2026-09-04",
+    "description": "Merchant ABC"
+  },
+  {
+    "transactionId": "TXN005",
+    "accountId": "ACC001",
+    "type": "BANK_TRANSFER",
+    "amount": 5000.00,
+    "status": "SUCCESS",
+    "date": "2026-09-05",
+    "description": "Transfer to Rahul"
+  },
+  {
+    "transactionId": "TXN006",
+    "accountId": "ACC001",
+    "type": "UPI",
+    "amount": 1200.00,
+    "status": "SUCCESS",
+    "date": "2026-09-06",
+    "description": "Swiggy"
+  },
+  {
+    "transactionId": "TXN007",
+    "accountId": "ACC001",
+    "type": "UPI",
+    "amount": 3200.00,
+    "status": "FAILED",
+    "date": "2026-09-07",
+    "description": "Flipkart"
+  },
+  {
+    "transactionId": "TXN008",
+    "accountId": "ACC001",
+    "type": "CARD",
+    "amount": 799.00,
+    "status": "SUCCESS",
+    "date": "2026-09-08",
+    "description": "Spotify"
+  },
+  {
+    "transactionId": "TXN009",
+    "accountId": "ACC001",
+    "type": "UPI",
+    "amount": 250.00,
+    "status": "SUCCESS",
+    "date": "2026-09-09",
+    "description": "Cafe Coffee Day"
+  },
+  {
+    "transactionId": "TXN010",
+    "accountId": "ACC001",
+    "type": "BANK_TRANSFER",
+    "amount": 10000.00,
+    "status": "SUCCESS",
+    "date": "2026-09-10",
+    "description": "Salary Credit"
+  },
+  {
+    "transactionId": "TXN011",
+    "accountId": "ACC001",
+    "type": "UPI",
+    "amount": 1800.00,
+    "status": "REFUND_PENDING",
+    "date": "2026-09-10",
+    "description": "Myntra"
+  },
+  {
+    "transactionId": "TXN012",
+    "accountId": "ACC001",
+    "type": "CARD",
+    "amount": 2499.00,
+    "status": "SUCCESS",
+    "date": "2026-09-11",
+    "description": "Croma"
+  },
+  {
+    "transactionId": "TXN013",
+    "accountId": "ACC001",
+    "type": "UPI",
+    "amount": 650.00,
+    "status": "FAILED",
+    "date": "2026-09-11",
+    "description": "Zomato"
+  },
+  {
+    "transactionId": "TXN014",
+    "accountId": "ACC001",
+    "type": "UPI",
+    "amount": 4500.00,
+    "status": "SUCCESS",
+    "date": "2026-09-12",
+    "description": "Electricity Bill"
+  },
+  {
+    "transactionId": "TXN015",
+    "accountId": "ACC001",
+    "type": "BANK_TRANSFER",
+    "amount": 7500.00,
+    "status": "SUCCESS",
+    "date": "2026-09-12",
+    "description": "Transfer to Priya"
+  }
+]

@@ -17,6 +17,7 @@ firebaseAppCheckDebug = "34.18.0"
 composeMarkdown = "1.0.4"
 room = "2.8.5"
 ksp = "2.2.10-2.0.2"
+common = "0.10.0"
 
 
 [libraries]
@@ -48,6 +49,7 @@ androidx-room-runtime = { group = "androidx.room", name = "room-runtime", versio
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
+common = { group = "com.google.ai.client.generativeai", name = "common", version.ref = "common" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

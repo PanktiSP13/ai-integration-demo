@@ -9,6 +9,7 @@ import com.pinu.ai_integration_demo_project.data.model.SenderType
 import com.pinu.ai_integration_demo_project.data.model.bank_support.TransactionAnalysis
 import com.pinu.ai_integration_demo_project.data.repository.AIRepository
 import com.pinu.ai_integration_demo_project.data.repository.chat_support.ChatRepository
+import com.pinu.ai_integration_demo_project.ui.utils.BankingMockDataLoader
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow

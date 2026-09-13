@@ -11,16 +11,20 @@ import com.google.firebase.ai.type.GenerativeBackend
 import com.google.firebase.ai.type.Tool
 import com.google.firebase.ai.type.content
 import com.google.firebase.ai.type.generationConfig
-import com.pinu.ai_integration_demo_project.data.ToolCalls
 import com.pinu.ai_integration_demo_project.data.model.SenderType
 import com.pinu.ai_integration_demo_project.data.repository.chat_support.ChatRepository
 import com.pinu.ai_integration_demo_project.data.schemas.transactionSchema
-import kotlinx.coroutines.delay
+import com.pinu.ai_integration_demo_project.data.system_instructions.bankingRoleInstructions
+import com.pinu.ai_integration_demo_project.data.system_instructions.defaultRoleInstructions
+import com.pinu.ai_integration_demo_project.data.tool_executors.BankingToolExecutor
+import com.pinu.ai_integration_demo_project.data.tool_executors.ToolCalls
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlin.time.Duration.Companion.milliseconds
 
-class AIRepository(private val chatRepository: ChatRepository) {
+class AIRepository(
+    private val chatRepository: ChatRepository,
+    private val bankingToolExecutor: BankingToolExecutor,
+) {
 
     private val globalModel = Firebase.ai(backend = GenerativeBackend.googleAI()).generativeModel(modelName = "gemini-3.5-flash-lite")
 
@@ -37,11 +41,7 @@ class AIRepository(private val chatRepository: ChatRepository) {
     }
 
     private fun createSystemInstruction(role: String): Content {
-        return content {
-            text(
-                """You are an AI assistant with the role: $role role.Stay within this role and answer relevant questions.For unrelated questions, reply only: "I can only help with topics related to my role."Keep responses concise unless more detail is requested..""".trimIndent()
-            )
-        }
+        return content { text(if (role == "Banking Application Support") bankingRoleInstructions else defaultRoleInstructions(role)) }
     }
 
     // v1 -> non-streaming response from AI model
@@ -57,7 +57,6 @@ class AIRepository(private val chatRepository: ChatRepository) {
             globalModel.generateContentStream(prompt).collect { chunk ->
                 emit(chunk.text.orEmpty())
                 Log.e("Pankti", "askAIStream: ${chunk.text.orEmpty()}")
-                delay(100.milliseconds)
             }
         } catch (e: Exception) {
             Log.e("Pankti", "askAIStream: ${e.message.orEmpty()}")
@@ -105,7 +104,6 @@ class AIRepository(private val chatRepository: ChatRepository) {
 
                     Log.e("AI_STREAM","chunk=$text")
 
-                    delay(100.milliseconds)
                 }
 
         } catch (e: Exception) {
@@ -138,26 +136,56 @@ class AIRepository(private val chatRepository: ChatRepository) {
 
 
     //v5 -> function calling from AI model (Tool calls)
+    // Talk to Gemini → detect tool calls → ask ToolExecutor to execute them → send result back → return final text.
     suspend fun askBankAppSupportAI(chatId:String,role: String,prompt: String): String{
         try {
             val chat = getOrCreateChatSession(chatId, role,tools = listOf(ToolCalls.bankingTool))
-            val response = chat.sendMessage(prompt)
-            Log.e("AI_STREAM", "askBankAppSupportAI: $response")
+            var response = chat.sendMessage(prompt)
+            Log.e("AI_STREAM", "askBankAppSupportAI: ${response.text.toString()}")
 
-            response.functionCalls.forEach { functionCall ->
-                println("Function name: ${functionCall.name}")
-                println("Arguments: ${functionCall.args.toList().joinToString(", ")}")
+            var toolCallCount = 0
+            val maxToolCalls = 5
+
+            while (response.functionCalls.isNotEmpty()) {
+
+                if (++toolCallCount > maxToolCalls) {
+                    return "I couldn't complete the request."
+                }
+                Log.e("AI_FUNCTION", "Function calls detected: ${response.functionCalls.size}")
+
+                val functionResponseParts = response.functionCalls.map { functionCall ->
+                    Log.e("AI_FUNCTION", "Executing: ${functionCall.name}")
+                    Log.e("AI_FUNCTION", "Arguments: ${functionCall.args.toList().joinToString(", ")}")
+                    bankingToolExecutor.execute(functionCall)
+                }
+
+
+                // Send tool results back to Gemini
+                response = chat.sendMessage(
+                    content("user") {
+                        functionResponseParts.forEach { functionResponse ->
+                            part(functionResponse)
+                        }
+                    }
+                )
+
+                Log.e("AI_FUNCTION", "Response after tool execution: ${response.text.toString()}")
+
             }
+
+            // No more function calls.
+            // This is the final Gemini response.
+            Log.e("AI_FUNCTION", "Final response: ${response.text.orEmpty()}")
             return response.text.orEmpty()
 
         } catch (e: Exception) {
 
             Log.e("AI_STREAM", "chatId=$chatId error=${e.message}", e)
 
-            if (e.message?.contains("You exceeded your current quota") == true) {
-             return "Limit exceeded for today. Please try again tomorrow."
+            return if (e.message?.contains("You exceeded your current quota") == true) {
+                "Limit exceeded for today. Please try again tomorrow."
             } else {
-                throw e
+                "Something went wrong"
             }
         }
     }

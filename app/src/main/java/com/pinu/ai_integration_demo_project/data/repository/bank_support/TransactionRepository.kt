@@ -8,4 +8,12 @@ class TransactionRepository(private val transactionDao: TransactionDao) {
     suspend fun getTransactionStatus(transactionId: String): TransactionEntity? {
         return transactionDao.getTransaction(transactionId)
     }
+
+    suspend fun getMockTransactions(transactions: List<TransactionEntity>) {
+        if (transactionDao.getTransactionCount() > 0) {
+            return
+        }
+
+        transactionDao.insertTransactions(transactions)
+    }
 }
