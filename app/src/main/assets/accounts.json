@@ -1,0 +1,18 @@
+[
+  {
+    "accountId": "ACC001",
+    "accountNumber": "XXXX1234",
+    "accountType": "SAVINGS",
+    "balance": 25000.00,
+    "currency": "INR",
+    "status": "ACTIVE"
+  },
+  {
+    "accountId": "ACC002",
+    "accountNumber": "XXXX5678",
+    "accountType": "CURRENT",
+    "balance": 75000.00,
+    "currency": "INR",
+    "status": "ACTIVE"
+  }
+]

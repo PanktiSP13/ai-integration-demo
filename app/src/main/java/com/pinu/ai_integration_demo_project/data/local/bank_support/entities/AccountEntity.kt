@@ -7,9 +7,9 @@ import androidx.room.PrimaryKey
 data class AccountEntity(
     @PrimaryKey
     val accountId: String,
-    val customerId: String,
+    val accountNumber: String,
     val accountType: String,
-    val bankName: String,
     val balance: Double,
-    val currency: String
+    val currency: String,
+    val status: String
 )

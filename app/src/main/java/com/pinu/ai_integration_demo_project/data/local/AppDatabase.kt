@@ -6,7 +6,9 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.pinu.ai_integration_demo_project.data.local.bank_support.dao.AccountDao
 import com.pinu.ai_integration_demo_project.data.local.bank_support.dao.TransactionDao
+import com.pinu.ai_integration_demo_project.data.local.bank_support.entities.AccountEntity
 import com.pinu.ai_integration_demo_project.data.local.bank_support.entities.TransactionEntity
 import com.pinu.ai_integration_demo_project.data.local.chat_support.Converters
 import com.pinu.ai_integration_demo_project.data.local.chat_support.dao.ChatDao
@@ -14,12 +16,13 @@ import com.pinu.ai_integration_demo_project.data.local.chat_support.dao.MessageD
 import com.pinu.ai_integration_demo_project.data.local.chat_support.entities.ChatEntity
 import com.pinu.ai_integration_demo_project.data.local.chat_support.entities.MessageEntity
 
-@Database(entities = [ChatEntity::class, MessageEntity::class, TransactionEntity::class], version = 2, exportSchema = false)
+@Database(entities = [ChatEntity::class, MessageEntity::class, TransactionEntity::class, AccountEntity::class], version = 4, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun chatDao(): ChatDao
     abstract fun messageDao(): MessageDao
     abstract fun transactionDao(): TransactionDao
+    abstract fun accountDao(): AccountDao
 
     companion object {
         @Volatile

@@ -7,6 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.lifecycle.lifecycleScope
 import com.pinu.ai_integration_demo_project.data.local.AppDatabase
 import com.pinu.ai_integration_demo_project.data.repository.AIRepository
+import com.pinu.ai_integration_demo_project.data.repository.bank_support.AccountRepository
 import com.pinu.ai_integration_demo_project.data.repository.bank_support.TransactionRepository
 import com.pinu.ai_integration_demo_project.data.repository.chat_support.ChatRepository
 import com.pinu.ai_integration_demo_project.data.tool_executors.BankingToolExecutor
@@ -20,7 +21,8 @@ class MainActivity : ComponentActivity() {
     private val database by lazy { AppDatabase.getDatabase(this) }
     private val repository by lazy { ChatRepository(database.chatDao(), database.messageDao()) }
     private val transactionRepository by lazy { TransactionRepository(database.transactionDao()) }
-    private val aiRepository by lazy { AIRepository(repository, BankingToolExecutor(transactionRepository)) }
+    private val accountRepository by lazy { AccountRepository(database.accountDao()) }
+    private val aiRepository by lazy { AIRepository(repository, BankingToolExecutor(transactionRepository,accountRepository)) }
     private val viewModel by lazy { ChatViewModel(repository, aiRepository) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,7 +31,7 @@ class MainActivity : ComponentActivity() {
 
         // Bank App Support : Load mock data for transactions
         lifecycleScope.launch {
-            BankingMockDataLoader(context = this@MainActivity, transactionRepository).load()
+            BankingMockDataLoader(context = this@MainActivity, transactionRepository,accountRepository).load()
         }
 
         setContent {
