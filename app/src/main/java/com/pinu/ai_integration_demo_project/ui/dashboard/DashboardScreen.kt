@@ -28,6 +28,7 @@ fun DashboardScreen(
     onNavigateToChats: () -> Unit,
     onNavigateToBankingSupportChat: () -> Unit,
     onNavigateToBankingAppSupportChat: () -> Unit,
+    onNavigateToBankingSupportAIAgent: () -> Unit,
 ) {
     val chats by viewModel.chats.collectAsStateWithLifecycle()
     val chatCount = chats.size
@@ -54,25 +55,30 @@ fun DashboardScreen(
         }
     ) { padding ->
         Column(
-            modifier = Modifier.padding(padding).fillMaxWidth()
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxWidth()
         ) {
             Button(
-                modifier = Modifier
-                    .padding(padding)
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
                 onClick = {
                     onNavigateToBankingSupportChat()
                 }) {
                 Text("Banking Support Chat \n (Structured Output)")
             }
             Button(
-                modifier = Modifier
-                    .padding(padding)
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
                 onClick = {
                     onNavigateToBankingAppSupportChat()
                 }) {
                 Text("Banking Support Chat \n (Function Calling)")
+            }
+            Button(
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                onClick = {
+                    onNavigateToBankingSupportAIAgent()
+                }) {
+                Text("Banking Support AI Agent \n (Agent)")
             }
         }
 

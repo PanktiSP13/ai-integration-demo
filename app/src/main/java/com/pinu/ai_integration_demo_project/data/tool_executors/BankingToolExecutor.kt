@@ -5,6 +5,7 @@ import com.google.firebase.ai.type.FunctionCallPart
 import com.google.firebase.ai.type.FunctionResponsePart
 import com.pinu.ai_integration_demo_project.data.repository.bank_support.AccountRepository
 import com.pinu.ai_integration_demo_project.data.repository.bank_support.TransactionRepository
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 
@@ -17,6 +18,7 @@ class BankingToolExecutor(private val transactionRepository: TransactionReposito
         return when (functionCall.name) {
             ToolName.transactionStatus.value -> getTransactionStatus(functionCall)
             ToolName.accountBalance.value -> getAccountBalance(functionCall)
+            ToolName.recentTransactions.value -> getRecentTransactions(functionCall)
             else -> unknownFunction(functionCall.name)
         }
     }
@@ -71,9 +73,7 @@ class BankingToolExecutor(private val transactionRepository: TransactionReposito
         }
     }
 
-    private suspend fun getAccountBalance(
-        functionCall: FunctionCallPart,
-    ): FunctionResponsePart {
+    private suspend fun getAccountBalance(functionCall: FunctionCallPart): FunctionResponsePart {
 
         val accountId = functionCall.args["accountId"]?.toString()?.trim('"')
 
@@ -118,9 +118,70 @@ class BankingToolExecutor(private val transactionRepository: TransactionReposito
         }
     }
 
-    private fun unknownFunction(
-        functionName: String,
-    ): FunctionResponsePart {
+    private suspend fun getRecentTransactions(functionCall: FunctionCallPart): FunctionResponsePart {
+
+        val accountId = functionCall.args["accountId"]?.toString()?.trim('"')
+        val limit = functionCall.args["limit"]?.toString()?.toIntOrNull() ?: 5
+
+        if (accountId.isNullOrBlank()) {
+
+            return FunctionResponsePart(
+                functionCall.name,
+                JsonObject(
+                    mapOf(
+                        "success" to JsonPrimitive(false),
+                        "error" to JsonPrimitive("accountId is missing")
+                    )
+                )
+            )
+        }
+
+        // Prevent the model from requesting an unreasonable number.
+        val safeLimit = limit.coerceIn(1, 10)
+        val transactions = transactionRepository.getRecentTransactions(accountId = accountId, limit = safeLimit)
+
+        if (transactions.isEmpty()) {
+
+            return FunctionResponsePart(
+                functionCall.name,
+                JsonObject(
+                    mapOf(
+                        "success" to JsonPrimitive(true),
+                        "accountId" to JsonPrimitive(accountId),
+                        "transactions" to JsonArray(emptyList())
+                    )
+                )
+            )
+        }
+
+        val transactionArray = JsonArray(
+            transactions.map { transaction ->
+                JsonObject(
+                    mapOf(
+                        "transactionId" to JsonPrimitive(transaction.transactionId),
+                        "type" to JsonPrimitive(transaction.type),
+                        "amount" to JsonPrimitive(transaction.amount),
+                        "status" to JsonPrimitive(transaction.status),
+                        "date" to JsonPrimitive(transaction.date),
+                        "description" to JsonPrimitive(transaction.description)
+                    )
+                )
+            }
+        )
+
+        return FunctionResponsePart(
+            functionCall.name,
+            JsonObject(
+                mapOf(
+                    "success" to JsonPrimitive(true),
+                    "accountId" to JsonPrimitive(accountId),
+                    "transactions" to transactionArray
+                )
+            )
+        )
+    }
+
+    private fun unknownFunction(functionName: String): FunctionResponsePart {
 
         return FunctionResponsePart(
             functionName,

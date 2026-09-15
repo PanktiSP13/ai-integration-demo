@@ -30,12 +30,9 @@ fun ChatNavigation(viewModel: ChatViewModel) {
             DashboardScreen(
                 viewModel = viewModel,
                 onNavigateToChats = { navController.navigate(Screen.ChatList.route) },
-                onNavigateToBankingSupportChat = {
-                    navController.navigate(Screen.Chat.createRoute("banking_support", "Banking Application Support","Bank Support"))
-                },
-                onNavigateToBankingAppSupportChat = {
-                    navController.navigate(Screen.Chat.createRoute("banking_app_support", "Banking Application Support","Bank App Support"))
-                }
+                onNavigateToBankingSupportChat = { navController.navigate(Screen.Chat.createRoute("banking_support", "Banking Application Support", "Bank Support")) },
+                onNavigateToBankingAppSupportChat = { navController.navigate(Screen.Chat.createRoute("banking_app_support", "Banking Application Support", "Bank App Support")) },
+                onNavigateToBankingSupportAIAgent = { navController.navigate(Screen.Chat.createRoute("banking_support_ai_agent", "Banking Support AI Agent", "AI Agent")) }
             )
         }
         composable(Screen.ChatList.route) {

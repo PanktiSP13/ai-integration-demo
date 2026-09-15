@@ -33,7 +33,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.boswelja.markdown.material3.MarkdownDocument
@@ -88,17 +87,7 @@ fun ChatScreen(chatId: String,
                     )
                     IconButton(onClick = {
                         if (textState.isNotBlank()) {
-//                            viewModel.askAI(chatId, role, textState) //v1
-//                            viewModel.askAIStream(chatId, role, textState)//v2
-
-                            if (chatId == "banking_support") {
-                                viewModel.askBankSupportAI(chatId, role, textState) //v4
-                            } else if (chatId == "banking_app_support") {
-                                viewModel.askBankAppSupportAI(chatId, role, textState) //v5
-                            }
-                            else {
-                                viewModel.askAIStreamWithChatSession(chatId, role, textState)//v3
-                            }
+                            viewModel.askAIAssistant(chatId, role, textState)
                             textState = ""
                         }
                     }) {
@@ -111,7 +100,8 @@ fun ChatScreen(chatId: String,
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding).verticalScroll(rememberScrollState())
+                .padding(padding)
+                .verticalScroll(rememberScrollState())
         ) {
             LazyColumn(
                 modifier = Modifier
@@ -144,7 +134,9 @@ fun MessageBubble(message: Message) {
     val color = if (isUser) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.secondaryContainer
 
     Column(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
         horizontalAlignment = alignment
     ) {
         Box(

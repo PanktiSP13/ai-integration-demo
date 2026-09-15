@@ -9,7 +9,6 @@ import com.pinu.ai_integration_demo_project.data.model.SenderType
 import com.pinu.ai_integration_demo_project.data.model.bank_support.TransactionAnalysis
 import com.pinu.ai_integration_demo_project.data.repository.AIRepository
 import com.pinu.ai_integration_demo_project.data.repository.chat_support.ChatRepository
-import com.pinu.ai_integration_demo_project.ui.utils.BankingMockDataLoader
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -161,7 +160,53 @@ class ChatViewModel(private val repository: ChatRepository,
         }
     }
 
+
+    fun askBankSupportAIAgent(chatId: String, role: String, prompt: String) {
+        viewModelScope.launch {
+
+            if (repository.getChatById(chatId) == null) {
+                repository.createChat(name = role, role = role, id = chatId)
+            }
+            repository.createMessage(chatId, prompt, SenderType.USER)
+
+            _isTyping.value = true
+            val response = aiRepository.askBankSupportAIAgent(chatId, role, prompt)
+            _isTyping.value = false
+
+            repository.createMessage(chatId, response, SenderType.AI)
+        }
+    }
+
+
+    fun askAIAssistant(chatId: String, role: String, prompt: String) {
+
+        // askAI(chatId, role, textState) //v1
+        // askAIStream(chatId, role, textState)//v2
+
+        when (chatId) {
+            CustomRoleType.BANKING_SUPPORT.value -> {
+                askBankSupportAI(chatId, role, prompt) //v4
+            }
+
+            CustomRoleType.BANKING_APP_SUPPORT.value -> {
+                askBankAppSupportAI(chatId, role, prompt) //v5
+            }
+
+            CustomRoleType.BANKING_SUPPORT_AI_AGENT.value -> {
+                askBankSupportAIAgent(chatId, role, prompt) //v6
+            }
+
+            else -> askAIStreamWithChatSession(chatId, role, prompt) //v3
+        }
+    }
+
     suspend fun getChatById(chatId: String): Chat? {
         return repository.getChatById(chatId)
     }
+}
+
+enum class CustomRoleType(val value: String, val role: String) {
+    BANKING_SUPPORT("banking_support","Banking Support"),
+    BANKING_APP_SUPPORT("banking_app_support","Banking App Support"),
+    BANKING_SUPPORT_AI_AGENT("banking_support_ai_agent","Banking Support AI Agent"),
 }

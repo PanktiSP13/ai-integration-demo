@@ -16,8 +16,10 @@ import com.pinu.ai_integration_demo_project.data.repository.chat_support.ChatRep
 import com.pinu.ai_integration_demo_project.data.schemas.transactionSchema
 import com.pinu.ai_integration_demo_project.data.system_instructions.bankingRoleInstructions
 import com.pinu.ai_integration_demo_project.data.system_instructions.defaultRoleInstructions
+import com.pinu.ai_integration_demo_project.data.system_instructions.getSystemInstructions
 import com.pinu.ai_integration_demo_project.data.tool_executors.BankingToolExecutor
 import com.pinu.ai_integration_demo_project.data.tool_executors.ToolCalls
+import com.pinu.ai_integration_demo_project.ui.CustomRoleType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -41,7 +43,7 @@ class AIRepository(
     }
 
     private fun createSystemInstruction(role: String): Content {
-        return content { text(if (role == "Banking Application Support") bankingRoleInstructions else defaultRoleInstructions(role)) }
+        return getSystemInstructions(role) 
     }
 
     // v1 -> non-streaming response from AI model
@@ -67,7 +69,7 @@ class AIRepository(
     }
 
     //v3 -> maintaining chat session to provide chat context to AI model for better response
-    private suspend fun getOrCreateChatSession(chatId: String, role: String,generationConfig: GenerationConfig? = null,tools : List<Tool>?= null): Chat {
+    private suspend fun getOrCreateChatSession(chatId: String, role: String, model: GenerativeModel): Chat {
 
         // 1. Return existing session
         val session = chatSessions[chatId]
@@ -75,7 +77,7 @@ class AIRepository(
 
 
         // 2. Create Gemini model with this chat's role
-        val model = createModel(role, generationConfig, tools)
+        // val model = createModel(role, generationConfig, tools)
 
 
         // 3. Restore history from DB
@@ -92,7 +94,7 @@ class AIRepository(
 
     fun askAIStream(chatId: String, role: String, prompt: String): Flow<String> = flow {
         try {
-            val chat = getOrCreateChatSession(chatId, role)
+            val chat = getOrCreateChatSession(chatId, role,createModel(role))
 
             chat.sendMessageStream(prompt)
                 .collect { chunk ->
@@ -139,7 +141,8 @@ class AIRepository(
     // Talk to Gemini → detect tool calls → ask ToolExecutor to execute them → send result back → return final text.
     suspend fun askBankAppSupportAI(chatId:String,role: String,prompt: String): String{
         try {
-            val chat = getOrCreateChatSession(chatId, role,tools = listOf(ToolCalls.bankingTool))
+            val model = createModel(role,tools = listOf(ToolCalls.bankingTool))
+            val chat = getOrCreateChatSession(chatId, role,model)
             var response = chat.sendMessage(prompt)
             Log.e("AI_STREAM", "askBankAppSupportAI: ${response.text.toString()}")
 
@@ -149,7 +152,63 @@ class AIRepository(
             while (response.functionCalls.isNotEmpty()) {
 
                 if (++toolCallCount > maxToolCalls) {
-                    return "I couldn't complete the request."
+                    return "I couldn't complete the request.Max tool calls limit has been exhausted"
+                }
+                Log.e("AI_FUNCTION", "Function calls detected: ${response.functionCalls.size}")
+
+                val functionResponseParts = response.functionCalls.map { functionCall ->
+                    Log.e("AI_FUNCTION", "Executing: ${functionCall.name}")
+                    Log.e("AI_FUNCTION", "Arguments: ${functionCall.args.toList().joinToString(", ")}")
+                    bankingToolExecutor.execute(functionCall)
+                }
+
+
+                // Send tool results back to Gemini
+                response = chat.sendMessage(
+                    content("user") {
+                        functionResponseParts.forEach { functionResponse ->
+                            part(functionResponse)
+                        }
+                    }
+                )
+
+                Log.e("AI_FUNCTION", "Response after tool execution: ${response.text.toString()}")
+
+            }
+
+            // No more function calls.
+            // This is the final Gemini response.
+            Log.e("AI_FUNCTION", "Final response: ${response.text.orEmpty()}")
+            return response.text.orEmpty()
+
+        } catch (e: Exception) {
+
+            Log.e("AI_STREAM", "chatId=$chatId error=${e.message}", e)
+
+            return if (e.message?.contains("You exceeded your current quota") == true) {
+                "Limit exceeded for today. Please try again tomorrow."
+            } else {
+                "Something went wrong"
+            }
+        }
+    }
+
+
+    //v6 -> function calling from AI model (Agent)
+    suspend fun askBankSupportAIAgent(chatId:String,role: String,prompt: String): String{
+        try {
+            val model = createModel(role,tools = listOf(ToolCalls.bankingTool))
+            val chat = getOrCreateChatSession(chatId, role,model)
+            var response = chat.sendMessage(prompt)
+            Log.e("AI_STREAM", "askBankSupportAIAgent: ${response.text.toString()}")
+
+            var toolCallCount = 0
+            val maxToolCalls = 5
+
+            while (response.functionCalls.isNotEmpty()) {
+
+                if (++toolCallCount > maxToolCalls) {
+                    return "I couldn't complete the request.Max tool calls limit has been exhausted"
                 }
                 Log.e("AI_FUNCTION", "Function calls detected: ${response.functionCalls.size}")
 

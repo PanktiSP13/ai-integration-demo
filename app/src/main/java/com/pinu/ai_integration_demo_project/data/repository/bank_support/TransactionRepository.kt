@@ -16,4 +16,9 @@ class TransactionRepository(private val transactionDao: TransactionDao) {
 
         transactionDao.insertTransactions(transactions)
     }
+
+
+    suspend fun getRecentTransactions(accountId: String, limit: Int): List<TransactionEntity> {
+        return transactionDao.getRecentTransactions(accountId = accountId, limit = limit)
+    }
 }

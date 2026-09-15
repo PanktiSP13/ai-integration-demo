@@ -17,4 +17,7 @@ interface TransactionDao {
 
     @Query("SELECT COUNT(*) FROM `transaction`")
     suspend fun getTransactionCount(): Int
+
+    @Query("""SELECT * FROM `transaction` WHERE accountId = :accountId ORDER BY date DESC LIMIT :limit""")
+    suspend fun getRecentTransactions(accountId: String, limit: Int): List<TransactionEntity>
 }

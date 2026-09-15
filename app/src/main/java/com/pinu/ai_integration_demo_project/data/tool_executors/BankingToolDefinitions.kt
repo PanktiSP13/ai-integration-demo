@@ -9,18 +9,21 @@ object BankingToolDefinitions {
     val getTransactionStatusFunction = FunctionDeclaration(
         name = "getTransactionStatus",
         description = "Get the status and details of a transaction using its transaction ID.",
-        parameters = mapOf(
-            "transactionId" to Schema.string(description = "The unique transaction ID.")
-        )
+        parameters = mapOf("transactionId" to Schema.string(description = "The unique transaction ID."))
     )
 
     val getAccountBalanceFunction = FunctionDeclaration(
         name = "getAccountBalance",
         description = "Get the current balance and details of a bank account using its account ID.",
+        parameters = mapOf("accountId" to Schema.string(description = "The unique ID of the bank account."))
+    )
+
+    val getRecentTransactionsFunction = FunctionDeclaration(
+        name = "getRecentTransactions",
+        description = "Get the most recent transactions for a bank account.",
         parameters = mapOf(
-            "accountId" to Schema.string(
-                description = "The unique ID of the bank account."
-            )
+            "accountId" to Schema.string(description = "The unique ID of the bank account."),
+            "limit" to Schema.integer(description = "Maximum number of recent transactions to return.")
         )
     )
 }
@@ -28,11 +31,16 @@ object BankingToolDefinitions {
 object ToolCalls {
     val bankingTool = Tool.functionDeclarations(
         listOf(BankingToolDefinitions.getTransactionStatusFunction,
-            BankingToolDefinitions.getAccountBalanceFunction)
+            BankingToolDefinitions.getAccountBalanceFunction,
+            BankingToolDefinitions.getRecentTransactionsFunction
+        )
     )
 
 }
 
 enum class ToolName(val value: String){
-    transactionStatus("getTransactionStatus"), accountBalance("getAccountBalance")
+    transactionStatus("getTransactionStatus"),
+    accountBalance("getAccountBalance"),
+    recentTransactions("getRecentTransactions")
+
 }
