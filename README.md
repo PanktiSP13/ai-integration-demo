@@ -279,37 +279,6 @@ com.pinu.ai_integration_demo_project
 ```
 
 ---
-
-## 🏁 Getting Started
-
-### Prerequisites
-- Android Studio Ladybug (2024.2.1) or higher
-- JDK 11+
-- Android Device or Emulator running API 28 (Android 9.0) or higher
-- Firebase Project configured with Firebase AI / Gemini API enabled
-
-### Setup Instructions
-
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/your-username/AI_Integration_Demo_Project.git
-   cd AI_Integration_Demo_Project
-   ```
-
-2. **Add Firebase Configuration**:
-   - Create a project on the [Firebase Console](https://console.firebase.google.com/).
-   - Enable **Firebase AI / Vertex AI for Firebase** in your project settings.
-   - Download `google-services.json` and place it in the `app/` directory.
-
-3. **Build and Run**:
-   - Open the project in Android Studio.
-   - Sync Gradle project.
-   - Select an emulator or physical device and click **Run (Shift + F10)**.
-
----
-
-<p align="center">Made with ❤️ for Android & AI Developers</p>
-
 <img alt="Screenshot_20261008_212039" src="https://github.com/user-attachments/assets/9456b949-60dd-4b54-8b0d-f0e60d694088" width="150"/>
 <img alt="Screenshot_20261008_213912" src="https://github.com/user-attachments/assets/3a674fa8-2cfb-44d1-97c4-02629c25a7e5" width="150"/>
 <img alt="Screenshot_20260912_151648" src="https://github.com/user-attachments/assets/58c2a5b8-ffce-4c23-90bb-5d99929f14b4" width="150" />
