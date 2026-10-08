@@ -134,15 +134,12 @@ fun MessageBubble(message: Message) {
     val color = if (isUser) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.secondaryContainer
 
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
+        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
         horizontalAlignment = alignment
     ) {
         Box(
             modifier = Modifier
-                .clip(RoundedCornerShape(12.dp))
-                .background(color)
+                .clip(RoundedCornerShape(12.dp)).background(color)
                 .padding(12.dp)
         ) {
             // Compose-native Markdown renderer

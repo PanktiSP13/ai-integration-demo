@@ -1,0 +1,7 @@
+Expense Policy
+
+Business expenses must be submitted through the HRMS expense management system.
+
+Employees should submit expense claims within 30 days of the expense date.
+
+Valid receipts are required for applicable expense categories.
