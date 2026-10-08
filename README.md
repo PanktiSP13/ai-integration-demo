@@ -309,3 +309,14 @@ com.pinu.ai_integration_demo_project
 ---
 
 <p align="center">Made with ❤️ for Android & AI Developers</p>
+
+<img alt="Screenshot_20261008_212039" src="https://github.com/user-attachments/assets/9456b949-60dd-4b54-8b0d-f0e60d694088" width="150"/>
+<img alt="Screenshot_20261008_213912" src="https://github.com/user-attachments/assets/3a674fa8-2cfb-44d1-97c4-02629c25a7e5" width="150"/>
+<img alt="Screenshot_20260912_151648" src="https://github.com/user-attachments/assets/58c2a5b8-ffce-4c23-90bb-5d99929f14b4" width="150" />
+<img  alt="Screenshot_20260915_213806" src="https://github.com/user-attachments/assets/e542ae77-4c86-4353-8586-15b4bf2917fd" width="150"/>
+<img alt="Screenshot_20260911_134026" src="https://github.com/user-attachments/assets/c1b9a871-9626-4daa-9327-e0f3ae45c189" width="150" />
+<img  alt="Screenshot_20260911_192408" src="https://github.com/user-attachments/assets/9c73fac8-5cc7-4313-acdb-3680bcda3a92" width="150"/>
+<img alt="Screenshot_20260911_220040" src="https://github.com/user-attachments/assets/760636a1-486f-45a4-92ce-ed49c8f3f84d" width="150"/>
+
+
+
